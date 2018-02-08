@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import timezones from '../../data/timezone'
 import map from 'lodash/map';
-
+import axios from 'axios';
+import PropTypes from 'prop-types'
 
 class SignupForm extends Component {
     constructor(props){
@@ -27,7 +28,9 @@ class SignupForm extends Component {
 
     handleSubmit(e){
         e.preventDefault();
-        console.log(this.state)
+        
+        this.props.userSignupRequest(this.state)
+
     }
     render() {
         const options=map(timezones,(val,key) =>
@@ -37,6 +40,7 @@ class SignupForm extends Component {
         return (
             <form onSubmit={this.handleSubmit}>
                 <h1>Join our community</h1>
+                
                 <div className="form-group">
                     <label className="control-label">Username</label>
                     <input value={this.state.username} onChange={this.handleChange} type="text" name="username" className="form-control" />
@@ -83,6 +87,11 @@ class SignupForm extends Component {
             </form>
         ); 
     }
+}
+
+
+SignupForm.propTypes = {
+    userSignupRequest:PropTypes.func.isRequired
 }
 
 export default SignupForm;

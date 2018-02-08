@@ -17,9 +17,9 @@ issues i ran into
     git push origin master
 
 setting up react node project
- intstall express
+ * intstall express
  
- install path module - helps you use directory paths while sending files as response
+   * install path module - helps you use directory paths while sending files as response
 
  install babel-cli,babel-preset-es2015 - these are necessary modules for transpiling our code so that we can use new es2015 features like import etc
 
