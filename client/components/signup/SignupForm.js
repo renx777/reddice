@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import timezones from '../../data/timezone'
 import map from 'lodash/map';
-import axios from 'axios';
 import PropTypes from 'prop-types'
+import classnames from 'classnames';
+import validateInput from '../../../server/shared/validations/signup'
+import TextFieldGroup from '../common/TextFieldGroup';
+import {browserHistory} from 'react-router';
 
 class SignupForm extends Component {
     constructor(props){
@@ -12,7 +15,9 @@ class SignupForm extends Component {
             email:'',
             password:'',
             passwordConfirmation:'',
-            timezone:''
+            timezone:'',
+            errors:'',
+            isLoading: false
         }
     
         // bind this
@@ -26,13 +31,40 @@ class SignupForm extends Component {
         })
     }
 
+    isValid() {
+        const { errors, isValid} = validateInput(this.state);
+    
+    
+        if (!isValid) {
+            this.setState({ errors })   
+        }
+
+        return isValid;
+    }
+
     handleSubmit(e){
         e.preventDefault();
-        
-        this.props.userSignupRequest(this.state)
+
+        if (this.isValid()){
+
+            this.setState({ errors: {} ,isLoading: true });
+            this.props.userSignupRequest(this.state).then(
+                
+    
+                () => {
+
+                   // browserHistory.push('/')
+                    this.context.router.push('/')
+                },
+                (err) => this.setState({errors:err.response.data , isLoading: false})
+            )
+
+        }
 
     }
     render() {
+        const { errors } = this.state;
+        console.log(errors)
         const options=map(timezones,(val,key) =>
         <option key={val} value={val}>{key}</option>
     ) 
@@ -41,48 +73,59 @@ class SignupForm extends Component {
             <form onSubmit={this.handleSubmit}>
                 <h1>Join our community</h1>
                 
-                <div className="form-group">
-                    <label className="control-label">Username</label>
-                    <input value={this.state.username} onChange={this.handleChange} type="text" name="username" className="form-control" />
-                </div>
-                
-                <div className="form-group">
-                    <label className="control-label">Email</label>
-                    <input value={this.state.email} onChange={this.handleChange} type="text" name="email" className="form-control" />
-                </div>
-                
-                <div className="form-group">
-                    <label className="control-label">Password</label>
-                    <input value={this.state.password} onChange={this.handleChange} type="password" name="password" className="form-control" />
-                </div>
-                
-                <div className="form-group">
-                    <label className="control-label">Confirm</label>
-                    <input value={this.state.passwordConfirmation} onChange={this.handleChange} type="password" name="passwordConfirmation" className="form-control" />
-                </div>
-                    
+                <TextFieldGroup
+                error={errors.username}
+                label="Username"
+                onChange={this.handleChange}
+                checkUserExists={this.checkUserExists}
+                value={this.state.username}
+                field="username"
+                />
 
-                   
+                <TextFieldGroup
+                error={errors.email}
+                label="Email"
+                onChange={this.handleChange}
+                checkUserExists={this.checkUserExists}
+                value={this.state.email}
+                field="email"
+                />
 
+                <TextFieldGroup
+                error={errors.password}
+                label="Password"
+                onChange={this.handleChange}
+                value={this.state.password}
+                field="password"
+                type="password"
+                />
+
+                <TextFieldGroup
+                error={errors.passwordConfirmation}
+                label="Password Confirmation"
+                onChange={this.handleChange}
+                value={this.state.passwordConfirmation}
+                field="passwordConfirmation"
+                type="password"
+                />
                     
-                    <div className="form-group">
-                        <label className="control-label">Timezone</label>
-                        <select 
-                        name="timezone" 
+                <div className={classnames('form-group', { 'has-error': errors.timezone })}>
+                    <label className="control-label">Timezone</label>
+                    <select
+                        name="timezone"
                         className="form-control"
                         onChange={this.handleChange}
                         value={this.state.timezone}
-                        >
-                        <option value="" disabled>Choose Your Timezone</option> 
+                    >
+                        <option value="" disabled>Choose Your Timezone</option>
                         {options}
-                        </select>
-                        
-                    </div>
+                    </select>
+                    {errors.timezone && <span className="help-block">{errors.timezone}</span>}
 
-                
+                </div>
 
                 <div className="form-group">
-                    <button className="btn btn-primary btn-lg">Sign Up</button>
+                    <button disabled={this.state.isLoading} className="btn btn-primary btn-lg">Sign Up</button>
                 </div>
             </form>
         ); 
@@ -90,8 +133,8 @@ class SignupForm extends Component {
 }
 
 
-SignupForm.propTypes = {
-    userSignupRequest:PropTypes.func.isRequired
+SignupForm.contextTypes ={
+    router:PropTypes.object.isRequired
 }
 
 export default SignupForm;
