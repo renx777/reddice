@@ -53,6 +53,11 @@ class SignupForm extends Component {
     
                 () => {
 
+                    this.props.addFlashMessage({
+                        type:'success',
+                        text:'You signed up succesfully. Welcome!'
+                    });
+
                    // browserHistory.push('/')
                     this.context.router.push('/')
                 },
@@ -130,6 +135,12 @@ class SignupForm extends Component {
             </form>
         ); 
     }
+}
+
+
+SignupForm.propTypes = {
+    userSignupReques:PropTypes.func.isRequired,
+    addFlashMessage:PropTypes.func.isRequired 
 }
 
 
